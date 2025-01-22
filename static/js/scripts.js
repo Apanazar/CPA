@@ -1,5 +1,6 @@
+
 document.addEventListener("DOMContentLoaded", function () {
-  console.log("The DOM is fully loaded and disassembled");
+  console.log("DOM полностью загружен и разобран");
 
   const uploadBtn = document.getElementById("uploadBtn");
   const pixlInput = document.getElementById("pixlInput");
@@ -10,6 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const paletteselector = document.getElementById("paletteselector");
   const useAllColors = document.getElementById("useAllColors");
   const useAllColorsValue = document.getElementById("useAllColorsValue");
+
   const brightness = document.getElementById("brightness");
   const brightnessValue = document.getElementById("brightnessValue");
   const contrast = document.getElementById("contrast");
@@ -17,25 +19,30 @@ document.addEventListener("DOMContentLoaded", function () {
   const saturation = document.getElementById("saturation");
   const saturationValue = document.getElementById("saturationValue");
   const contour = document.getElementById("contour");
+
+  // <-- Новый код для разрешения
   const resolutionSelect = document.getElementById("resolution"); 
+  // Конец нового кода
 
   let originalImage = null;
   let palettesInfo = {};
 
+  // Инициализация SlimSelect для палитры
   new SlimSelect({
     select: "#paletteselector",
-    placeholder: "Select a palette",
+    placeholder: "Выберите палитру",
   });
 
+  // Загрузка палитр с сервера
   fetch("/palettes")
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Palettes could not be loaded");
+        throw new Error("Не удалось загрузить палитры");
       }
       return response.json();
     })
     .then((data) => {
-      console.log("Palettes have been received:", data);
+      console.log("Палитры получены:", data);
       data.forEach((paletteInfo) => {
         const option = document.createElement("option");
         option.value = paletteInfo.name;
@@ -58,11 +65,11 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     })
     .catch((error) => {
-      console.error("Error loading palettes:", error);
+      console.error("Ошибка при загрузке палитр:", error);
     });
 
   uploadBtn.addEventListener("click", () => {
-    console.log("The download button is pressed");
+    console.log("Кнопка загрузки нажата");
     pixlInput.click();
   });
 
@@ -76,9 +83,9 @@ document.addEventListener("DOMContentLoaded", function () {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      console.log("Image download initiated");
+      console.log("Скачивание изображения инициировано");
     } else {
-      alert("There is no image to download!");
+      alert("Нет изображения для скачивания!");
     }
   });
 
@@ -87,28 +94,28 @@ document.addEventListener("DOMContentLoaded", function () {
     if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = function (e) {
-        console.log("Image uploaded");
+        console.log("Изображение загружено");
         originalImage = e.target.result;
         processImage();
         downloadBtn.disabled = false; 
       };
       reader.readAsDataURL(file);
     } else {
-      alert("Please select a valid image file..");
-      console.log("The selected file is not an image");
+      alert("Пожалуйста, выберите допустимый файл изображения.");
+      console.log("Выбранный файл не является изображением");
     }
   });
 
   blocksize.addEventListener("input", () => {
     blockvalue.textContent = blocksize.value;
-    console.log("The block size has been changed:", blocksize.value);
+    console.log("Изменен размер блока:", blocksize.value);
     processImage();
   });
 
   useAllColors.addEventListener("input", () => {
     useAllColorsValue.textContent = useAllColors.value;
     console.log(
-      "The degree of use of all colors of the palette has been changed:",
+      "Изменена степень использования всех цветов палитры:",
       useAllColors.value
     );
     processImage();
@@ -116,19 +123,19 @@ document.addEventListener("DOMContentLoaded", function () {
 
   brightness.addEventListener("input", () => {
     brightnessValue.textContent = brightness.value;
-    console.log("The brightness has been changed:", brightness.value);
+    console.log("Изменена яркость:", brightness.value);
     processImage();
   });
 
   contrast.addEventListener("input", () => {
     contrastValue.textContent = contrast.value;
-    console.log("The contrast has been changed:", contrast.value);
+    console.log("Изменен контраст:", contrast.value);
     processImage();
   });
 
   saturation.addEventListener("input", () => {
     saturationValue.textContent = saturation.value;
-    console.log("The saturation has been changed:", saturation.value);
+    console.log("Изменена насыщенность:", saturation.value);
     processImage();
   });
 
@@ -138,7 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   paletteselector.addEventListener("change", () => {
-    console.log("The palette is selected:", paletteselector.value);
+    console.log("Выбрана палитра:", paletteselector.value);
     const selectedOption =
       paletteselector.options[paletteselector.selectedIndex];
     const paletteCount = parseInt(selectedOption.dataset.count, 10);
@@ -149,7 +156,7 @@ document.addEventListener("DOMContentLoaded", function () {
         useAllColorsValue.textContent = "1";
       }
       console.log(
-        `Maximum number of colors for useAllColors: ${paletteCount}`
+        `Максимальное количество цветов для useAllColors: ${paletteCount}`
       );
     } else {
       useAllColors.max = 20;
@@ -158,17 +165,21 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     processImage();
   });
+
+  // <-- Новый код: обработчик для выбора разрешения
   resolutionSelect.addEventListener("change", () => {
-    console.log("Resolution selected:", resolutionSelect.value);
+    console.log("Выбрано разрешение:", resolutionSelect.value);
     processImage();
   });
- 
+  // Конец нового кода
+
+  // Функция обработки
   function processImage() {
     if (!originalImage) {
-      console.log("There is no source image to process");
+      console.log("Нет исходного изображения для обработки");
       return;
     }
-    console.log("Starting image processing");
+    console.log("Начинаю обработку изображения");
 
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -178,11 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
       tempCanvas.height = img.height;
       const ctx = tempCanvas.getContext("2d");
       ctx.drawImage(img, 0, 0);
- 
+      // Отправляем текущее изображение на сервер для обработки
       uploadToServer(tempCanvas);
     };
     img.onerror = function () {
-      console.error("Couldn't upload the original image.");
+      console.error("Не удалось загрузить исходное изображение.");
     };
     img.src = originalImage;
   }
@@ -190,7 +201,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function uploadToServer(canvas) {
     canvas.toBlob(function (blob) {
       if (!blob) {
-        console.error("Couldn't create Blob from image.");
+        console.error("Не удалось создать Blob из изображения.");
         return;
       }
 
@@ -203,9 +214,12 @@ document.addEventListener("DOMContentLoaded", function () {
       formData.append("contrast", contrast.value);
       formData.append("saturation", saturation.value);
       formData.append("contour", contour.checked ? "on" : "off");
-      formData.append("resolution", resolutionSelect.value);
 
-      console.log("Sending data to the server");
+      // <-- Новый код
+      formData.append("resolution", resolutionSelect.value);
+      // Конец нового кода
+
+      console.log("Отправка данных на сервер");
 
       fetch("/process", {
         method: "POST",
@@ -213,7 +227,7 @@ document.addEventListener("DOMContentLoaded", function () {
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Error in image processing.");
+            throw new Error("Ошибка при обработке изображения.");
           }
           return response.blob();
         })
@@ -226,12 +240,12 @@ document.addEventListener("DOMContentLoaded", function () {
             pixelitcanvas.height = processedImg.height;
             ctx.drawImage(processedImg, 0, 0);
             URL.revokeObjectURL(url);
-            console.log("The processed image is rendered on canvas");
+            console.log("Обработанное изображение отрисовано на canvas");
           };
           processedImg.src = url;
         })
         .catch((error) => {
-          console.error("Error in image processing:", error);
+          console.error("Ошибка при обработке изображения:", error);
         });
     }, "image/png");
   }
